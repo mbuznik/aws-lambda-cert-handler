@@ -4,6 +4,7 @@ import {
   SecretsManagerClient,
   GetSecretValueCommand,
 } from "@aws-sdk/client-secrets-manager";
+import { AWSConstants, CertConstants } from "../Constants";
 
 export interface RSAKeyPair {
   publicKey: forge.pki.PublicKey;
@@ -26,16 +27,16 @@ export function generateRSAKeyPair(): RSAKeyPair {
 }
 
 async function getECCPassphraseSecret(): Promise<string> {
-  const secret_name = "ecc-passphrase";
+  const secret_name = AWSConstants.ECC_PASSPHRASE_AWS_SECRET_NAME;
   const client = new SecretsManagerClient({
-    region: "us-east-1",
+    region: AWSConstants.AWS_DEFAULT_REGION,
   });
   let response;
   try {
     response = await client.send(
       new GetSecretValueCommand({
         SecretId: secret_name,
-        VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
+        VersionStage: "AWSCURRENT",
       })
     );
   } catch (error) {
@@ -71,16 +72,10 @@ export async function generateECCKeyPair(): Promise<KeyPairSyncResult<string, st
 
 }
 
-// export function signPublicKey(publicKey: any, privateKey: any) {
-//   const md = forge.md.sha256.create();
-//   md.update(forge.pki.publicKeyToPem(publicKey), "utf8");
-//   return privateKey.sign(md);
-// }
-
 export async function signData(publicKey: any, privateKey: any, algorithm: string): Promise<string> {
   const sign = crypto.createSign("SHA256");
 
-  if (algorithm === "ECC") {
+  if (algorithm === CertConstants.ECC_ALGORITHM) {
     const passphrase = await getECCPassphraseSecret() || process.env.PASSPHRASE;
     try {
       console.log("Private key before decryption:", privateKey);
@@ -88,15 +83,15 @@ export async function signData(publicKey: any, privateKey: any, algorithm: strin
         key: privateKey,
         passphrase: passphrase, // Decrypt using the passphrase
       });
-      sign.update(forge.pki.publicKeyToPem(publicKey), "utf-8");
+      sign.update(forge.pki.publicKeyToPem(publicKey), CertConstants.DEFAULT_ENCODING);
       return sign.sign(decryptedPrivateKey, 'base64');
     } catch (err) {
       console.error("Error decrypting and signing the private key:", err);
       throw new Error("Failed to decrypt and sign private key for ECC.");
     }
-  } else if (algorithm === "RSA") {
+  } else if (algorithm === CertConstants.RSA_ALGORITHM) {
     const pemPublicKey = forge.pki.publicKeyToPem(publicKey);
-    sign.update(pemPublicKey, "utf8");
+    sign.update(pemPublicKey, CertConstants.DEFAULT_ENCODING);
     const pemPrivateKey = forge.pki.privateKeyToPem(privateKey);
     return sign.sign(pemPrivateKey, 'base64');
   } else {

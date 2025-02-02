@@ -5,4 +5,3 @@ dist/
 aws-lambda-cert
 src/certificate.pem
 .env
-/templates
