@@ -5,3 +5,4 @@ dist/
 aws-lambda-cert
 src/certificate.pem
 .env
+.DS_Store
