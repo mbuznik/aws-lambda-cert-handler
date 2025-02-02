@@ -1,15 +1,13 @@
 {
   "compilerOptions": {
-    // "lib": ["ES2022"],
     "target": "ES2020",
     "module": "ESNext",
-    "moduleResolution": "node",  // Resolve modules as Node.js would
+    "moduleResolution": "node", 
     "strict": true,
-    "esModuleInterop": true,     // Enables CommonJS/ESM interoperability
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    // "types": ["node"]            
+    "outDir": "./dist"
   },
-  "include": ["src/**/*.ts"]      // Ensure TypeScript files in 'src' are compiled
+  "include": ["src/**/*.ts"]
 }
