@@ -20,6 +20,7 @@ LOCAL_TEST=true/false
 PASSPHRASE=your-passphrase
 SIGNING_ALGORITHM=ECC/RSA
 CERTIFICATE_KEY = certificate.pem
+DYNAMODB_LOCAL_URL = "http://localhost:8000"
 
 ## To test locally
 1. Generate a X.509 v3 certificate using OpenSSL

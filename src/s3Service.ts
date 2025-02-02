@@ -5,24 +5,33 @@ import dotenv from 'dotenv';
 import { AWSConstants, CertConstants } from "../Constants";
 
 dotenv.config();
-const s3Client = new S3Client({})
+export class S3Service {
+	private s3Client: S3Client;
 
-async function getLocalCertificate(): Promise<string> {
-	const certName = process.env.CERTIFICATE_KEY || AWSConstants.CERTIFICATE_KEY;
-	const currentDir = path.dirname(new URL(import.meta.url).pathname);
-	const certificatePath = path.resolve(currentDir, certName);
-
-	try {
-		return fs.readFileSync(certificatePath, CertConstants.DEFAULT_ENCODING);
-	} catch (error) {
-		console.error('Error reading certificate file:', error);
-		throw new Error('Failed to read certificate file');
+	constructor() {
+		this.s3Client = new S3Client({});
 	}
-}
-async function getS3Certificate(bucketName: string, key: string): Promise<string> {
-	console.log("Reading certificate from S3 bucket...", process.env.BUCKET_NAME)
+
+	// Function to read the certificate from the local file system
+	private async getLocalCertificate(): Promise<string> {
+		const certName = process.env.CERTIFICATE_KEY || AWSConstants.CERTIFICATE_KEY;
+		const currentDir = path.dirname(new URL(import.meta.url).pathname);
+		const certificatePath = path.resolve(currentDir, certName);
+
 		try {
-			const response = await s3Client.send(
+			return fs.readFileSync(certificatePath, CertConstants.DEFAULT_ENCODING);
+		} catch (error) {
+			console.error('Error reading certificate file:', error);
+			throw new Error('Failed to read certificate file');
+		}
+	}
+
+	// Function to get the certificate from an S3 bucket
+	private async getS3Certificate(bucketName: string, key: string): Promise<string> {
+		console.log("Reading certificate from S3 bucket...", process.env.BUCKET_NAME);
+
+		try {
+			const response = await this.s3Client.send(
 				new GetObjectCommand({
 					Bucket: process.env.BUCKET_NAME || "default-bucket",
 					Key: key,
@@ -33,7 +42,7 @@ async function getS3Certificate(bucketName: string, key: string): Promise<string
 			}
 
 			const certificatePem = await response.Body.transformToString();
-			console.log("Successfully read certificate from s3 with key:", key)
+			console.log("Successfully read certificate from S3 with key:", key);
 			return certificatePem;
 		} catch (caught) {
 			if (caught instanceof NoSuchKey) {
@@ -47,14 +56,15 @@ async function getS3Certificate(bucketName: string, key: string): Promise<string
 			}
 			throw new Error('Failed to retrieve certificate from S3');
 		}
-}
-
-export async function getCertificateFromS3(bucketName: string, key: string): Promise<string> {
-	if (process.env.LOCAL_TEST === "true") {
-		return getLocalCertificate();
-	} else {
-		return getS3Certificate(bucketName, key);
 	}
-};
 
+	// Main function to fetch the certificate, either from local or S3
+	public async getCertificateFromS3(bucketName: string, key: string): Promise<string> {
+		if (process.env.LOCAL_TEST === "true") {
+			return this.getLocalCertificate();
+		} else {
+			return this.getS3Certificate(bucketName, key);
+		}
+	}
+}
 
