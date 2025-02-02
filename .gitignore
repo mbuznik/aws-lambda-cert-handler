@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+.vscode
+aws-lambda-cert
+src/certificate.pem
+.env
+.DS_Store

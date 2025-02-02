@@ -1,0 +1,16 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "dynamodb:PutItem"
+            ],
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:920373005419:table/test-Table-H7FULACYNRIG",
+                "arn:aws:s3:::test3-certificates-bucket-sb-920373005419/*"
+            ]
+        }
+    ]
+}s
