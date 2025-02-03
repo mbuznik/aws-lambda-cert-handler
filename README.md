@@ -12,6 +12,7 @@ npm install
 
 ```
 3. Set up environment variables - for testing purposes of this project
+
 Create a .env file in the root of the project to configure your environment variables. For local development, you’ll need the following:
 
 BUCKET_NAME=your-s3-bucket-name  
